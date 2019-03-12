@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 import argparse
 import smtplib
 
+
 def GetTroubledAgents(StatusCheck):
     '''Gets disconnected or dead OSSEC agents.'''
 # Creating empty list variables to be used later on.
@@ -26,17 +27,16 @@ def GetTroubledAgents(StatusCheck):
         agent_props = agent.split(',')
         agent_status = agent_props[3]
         agent_name = agent_props[1].rstrip('2')
-
         if agent_status == 'Disconnected':        
             try:
                 address = gethostbyname(agent_name)
             except gaierror:
-                address = 'NRF' 
+                address = 'NRF'
                 DeadAgents.append(agent_name)
 
             if not address == 'NRF':
                 try:
-                    check_call(['ping', '-c', '1', address], stderr=GF, 
+                    check_call(['ping', '-c', '1', address], stderr=GF,
                                stdout=GF)
                     DisconnectedAgents.append(agent_name)
                 except CalledProcessError:
@@ -48,7 +48,7 @@ def GetTroubledAgents(StatusCheck):
         return DeadAgents
     else:
         print('Invalid agent status.  Valid checks are for dead or ' +
-               'disconnected agents.')
+              'disconnected agents.')
 
 
 def EmailAgentStatus(StatusCheck, AgentList):
@@ -65,6 +65,7 @@ def EmailAgentStatus(StatusCheck, AgentList):
     s = smtplib.SMTP(gethostbyname('smtpserver.domain.com'), '25')
     s.sendmail(sender, recipients, msg.as_string())
     s.quit
+
 
 # Setting up an argument parser.
 a_parser = argparse.ArgumentParser()
