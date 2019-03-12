@@ -53,8 +53,8 @@ def GetTroubledAgents(StatusCheck):
 
 def EmailAgentStatus(StatusCheck, AgentList):
     '''Emails list of agents that require attention.'''
-    sender = 'OSSECAgentCheck@24hourfit.com'
-    recipients = 'gbentley@24hourfit.com'
+    sender = 'example@domain.com'
+    recipients = 'example@domain.com'
     mail_body = ('Below is the list of %s agents:\n\n\n\n') % (StatusCheck)
     for agent in AgentList:
         mail_body = mail_body + agent + '\n'
@@ -62,7 +62,7 @@ def EmailAgentStatus(StatusCheck, AgentList):
     msg['Subject'] = '%s OSSEC Agents' % (StatusCheck.capitalize())
     msg['From'] = sender
     msg['To'] = recipients
-    s = smtplib.SMTP(gethostbyname('mailvip.24hourfit.com'), '25')
+    s = smtplib.SMTP(gethostbyname('smtpserver.domain.com'), '25')
     s.sendmail(sender, recipients, msg.as_string())
     s.quit
 
