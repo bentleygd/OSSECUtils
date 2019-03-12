@@ -27,7 +27,7 @@ def GetTroubledAgents(StatusCheck):
         agent_props = agent.split(',')
         agent_status = agent_props[3]
         agent_name = agent_props[1].rstrip('2')
-        if agent_status == 'Disconnected':        
+        if agent_status == 'Disconnected':
             try:
                 address = gethostbyname(agent_name)
             except gaierror:
