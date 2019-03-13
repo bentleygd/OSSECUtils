@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE
 
 
 # This function starts the ossec-authd daemon by making a system call. The
-# path variables define command line arguments for the ossec authd daemon. 
+# path variables define command line arguments for the ossec authd daemon.
 def AuthdStart():
     key_path = 'PATH_TO_OSSEC_SSL_KEY'
     cert_path = 'PATH_TO_OSSEC_SSL_CERT'
