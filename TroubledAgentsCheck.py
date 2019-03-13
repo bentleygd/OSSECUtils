@@ -8,12 +8,12 @@ import smtplib
 
 
 def GetTroubledAgents(StatusCheck):
-    '''Gets disconnected or dead OSSEC agents.'''
+    """Gets disconnected or dead OSSEC agents."""
 # Creating empty list variables to be used later on.
     DisconnectedAgents = []
     DeadAgents = []
 
-# Creating a temporary file.
+# Creating a temp file to dump garbage into.
     GF = TemporaryFile()
 
 # Running an OSSEC command and parsing through the output, which will
@@ -51,10 +51,12 @@ def GetTroubledAgents(StatusCheck):
               'disconnected agents.')
 
 
+# This function emails the list of dysfunctional agents to the configured
+# email addresses.
 def EmailAgentStatus(StatusCheck, AgentList):
-    '''Emails list of agents that require attention.'''
-    sender = 'example@domain.com'
-    recipients = 'example@domain.com'
+    """Emails list of agents that require attention."""
+    sender = 'sender@domain.com'
+    recipients = 'recipients@domain.com'
     mail_body = ('Below is the list of %s agents:\n\n\n\n') % (StatusCheck)
     for agent in AgentList:
         mail_body = mail_body + agent + '\n'
