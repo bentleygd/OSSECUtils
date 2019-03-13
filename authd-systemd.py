@@ -5,7 +5,7 @@ from os import remove, kill
 from time import sleep
 from re import search, match
 from sys import argv
-from subprocess import Popen,PIPE
+from subprocess import Popen, PIPE
 
 # This function starts the ossec-authd daemon by making a system call. The
 # path variables define command line arguments for the ossec authd daemon. 
