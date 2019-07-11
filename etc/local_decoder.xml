@@ -1,0 +1,81 @@
+<!--
+   - Allowed fields:
+   - location - where the log came from (only on FTS)
+   - srcuser  - extracts the source username
+   - dstuser  - extracts the destination (target) username
+   - user     - an alias to dstuser (only one of the two can be used)
+   - srcip    - source ip
+   - dstip    - dst ip
+   - srcport  - source port
+   - dstport  - destination port
+   - protocol - protocol
+   - id       - event id
+   - url      - url of the event
+   - action   - event action (deny, drop, accept, etc)
+   - status   - event status (success, failure, etc)
+   - extra_data     - Any extra data
+  -->
+
+<!-- User addition syslog message
+  Sample log: Mar 25 12:26:29 some-host-name useradd[32274]: new user: name=tcpdump, UID=72, GID=72, home=/, shell=/sbin/nologin
+  -->
+
+<decoder name="UserAdd">
+  <program_name>useradd</program_name>
+</decoder>
+
+<decoder name="UserAdd-user-added">
+  <parent>UserAdd</parent>
+  <prematch offset="after_parent">^new user:</prematch>
+  <regex>(new \w+): name=(\S+), UID=\d+, GID=\d+, (\.+)</regex>
+  <order>action,user,extra_data</order>
+</decoder>
+
+
+<!--  User add group add syslog message
+  Sample log: Jul  3 11:02:48 some-host-name useradd[11767]: add 'test_acct' to group 'adm'
+  -->
+
+<decoder name="UserAdd-group-added">
+  <parent>UserAdd</parent>
+  <prematch offset="after_parent"> to group </prematch>
+  <regex offset="after_parent">^add '(\S+)' to group '(\w+)'$</regex>
+  <order>user,extra_data</order>
+</decoder>
+
+<!--  User modification syslog message
+  Sample log: Jul  3 10:39:11 some-host-name usermod[11047]: add 'test_acct' to group 'sudo'
+  -->
+
+<decoder name="UserMod">
+  <program_name>usermod</program_name>
+</decoder>
+
+<decoder name="UserMod-group-added">
+  <parent>UserMod</parent>
+  <prematch offset="after_parent"> to group </prematch>
+  <regex offset="after_parent">^add '(\S+)' to group '(\w+)'$</regex>
+  <order>user,extra_data</order>
+</decoder>
+
+<!-- UserDel syslog message
+  Sample log: Jul  3 11:04:44 some-host-name userdel[11838]: delete 'test_acct' from group 'sudo'
+  -->
+
+<decoder name="UserDel">
+  <parent>open-userdel</parent>
+  <prematch>^delete </prematch>
+  <regex offset="after_prematch">^'(\S+)' from group '(\w+)'$</regex>
+  <order>user,extra_data</order>
+</decoder>
+
+<!-- Sample Log for Kerberos failures on SSH
+  Sample log: Jul  5 15:18:20 some-host-name sshd[15196]: pam_krb5[15196]: authentication fails for 'test_acct' (test_acct@24HOURFIT.COM): Authentication failure (Preauthentication failed)
+  -->
+
+<decoder name="SSH_Krb_Failure">
+  <parent>sshd</parent>
+  <prematch offset="after_parent"> authentication fails </prematch>
+  <regex offset="after_prematch">^for '(\w+)'</regex>
+  <order>user</order>
+</decoder>

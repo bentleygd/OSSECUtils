@@ -1,0 +1,62 @@
+  <rule id="600029" level="15">
+    <options>alert_by_email</options>
+    <decoded_as>UserAdd</decoded_as>
+    <list field="user" lookup="not_match_key">lists/auth_nix_sa</list>
+    <extra_data>sudo|root</extra_data>
+    <description>Unauthorized user added to Unix admin group</description>
+    <group>adduser|account_changed,</group>
+  </rule>
+
+  <rule id="600031" level="15">
+    <options>alert_by_email</options>
+    <decoded_as>UserMod</decoded_as>
+    <list field="user" lookup="not_match_key">lists/auth_nix_sa</list>
+    <extra_data>sudo|root</extra_data>
+    <description>Unauthorized user added to Unix admin group</description>
+    <group>adduser|account_changed,</group>
+  </rule>
+
+  <rule id="600033" level="12">
+    <options>alert_by_email</options>
+    <decoded_as>open-userdel</decoded_as>
+    <extra_data>sudo|root</extra_data>
+    <description>User removed from Unix admin group</description>
+    <group>adduser|account_changed,</group>
+  </rule>
+
+  <rule id="600034" level="11">
+    <if_group>syscheck</if_group>
+    <match>/etc/group</match>
+    <description>Unix group file changed according to syscheck.</description>
+  </rule>
+
+  <rule id="600037" level="5">
+    <decoded_as>sshd</decoded_as>
+    <if_sid>5716</if_sid>
+    <list field="user" lookup="match_key">lists/auth_nix_sa</list>
+    <description>SSHD authentication failed for an admin user.</description>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <rule id="600038" level="5">
+    <decoded_as>pam</decoded_as>
+    <if_sid>5503</if_sid>
+    <list field="user" lookup="match_key">lists/auth_nix_sa</list>
+    <description>PAM Unix authentication failed for an admin user.</description>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <rule id="600039" level="5">
+    <decoded_as>sshd</decoded_as>
+    <if_sid>2501</if_sid>
+    <list field="user" lookup="match_key">lists/auth_nix_sa</list>
+    <description>PAM KRB authentication failed for an admin user.</description>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <rule id="600040" level="12" frequency="5" timeframe="60" ignore="120">
+   <if_matched_sid>600037</if_matched_sid>
+   <same_source_ip />
+   <description>Possible SSHD password spray for admin users.</description>
+   <group>authenticaiton_failed,</group>
+  </rule>
