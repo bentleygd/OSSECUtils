@@ -1,118 +1,45 @@
 #!/usr/bin/python
+from sys import path, argv
+path.insert(0, '../lib')
+from subprocess import Popen, PIPE
 from re import search
-from smtplib import SMTP
-from socket import gethostbyname
-from email.mime.text import MIMEText
-from ldap import initialize, SCOPE_SUBTREE
+import coreutils
 
-class LDAPConfig:
-    """Config class for LDAP stuff"""
-    def __init__(self, file_name):
-        self.fl = file_name
 
-    def LDAP_URL(self):
-        """Get the URL of the LDAP server"""
-        config = open(self.fl, 'r+b')
-        for line in config:
-            lurl = search(r'(^LDAP_URL: )(\S+)', line)
-            if lurl:
-                return lurl.group(2)
-        config.close()
+def GetGroups(host, monitored_groups):
+    '''SSH to a host and get the members of monitored groups.'''
+    m_groups = []
+    # SSH to the host and obtain the contents of /etc/group.  This 
+    # takes the host name provided as input, and will produce a list 
+    # of all groups and their members.
+    groups = str(Popen(['ssh', host, 'cat', '/etc/group'], stdout=PIPE
+                 ).stdout.read()).strip('\n').split('\n')
+    # Parsses through the groups and returns the groups and members of
+    # the monitored groups.
+    for group in groups:
+        for m_group in monitored_groups:
+            if search(r'^' + m_group, group):
+                m_groups.append(group)
+    return m_groups
 
-    def LDAP_Pass(self):
-        """Password for the user connecting to the LDAP server."""
-        config = open(self.fl, 'r+b')
-        for line in config:
-            ldap_secret = search(r'(^PASS: )(\S+)', line)
-            if ldap_secret:
-                return ldap_secret.group(2)
-        config.close()
 
-    def LDAP_BDN(self):
-        """Get the LDAP Bind DN."""
-        config = open(self.fl, 'r+b')
-        for line in config:
-            ldapbdn = search(r'(^BIND_DN: )(.+)', line)
-            if ldapbdn:
-                return ldapbdn.group(2)
-        config.close()
-
-class GetGroupConfig:
-"""Config class for main script"""
-    def __init__(self, filename)
-    self.fn = filename
-
-    def MonitoredGroups(self):
-    """Get the groups to monitor"""
-    config = open(self.fn, 'r+b')
-    for line in config:
-        m_groups = search(r'(^Monitored_Groups: )(.+)', line)
-        if mgroups:
-            return m_groups.group(2)
-    config.close()
-
-    def GetDBAGroup(self):
-    """Get the DBA group"""
-    config = open(self.fn, 'r+b')
-    for line in config:
-        dba_group = search(r'(^DBAs: )(.+)', line)
-        if dba_group:
-            return dba_group.group(2)
-    config.close()
-
-    def GetSAGroup(self):
-    """Get the sys admins"""
-    config = open(self.fn, 'r+b')
-    for line in config:
-        sa_group = search(r'SAs: )(.+)', line)
-            if sa_group:
-                return sa_group.group(2)
-    config.close()
-
-    def GetSecAdmins(self):
-    """Get the security admins"""
-    config = open(self.fn, 'r+b')
-    for line in config:
-        sec_admins = search(r'SecAdmin: )(.+)', line)
-            if sec_admin:
-                return sec_admins.group(2)
-    config.close()
-
-    def GetMailSender(self):
-    """Gets mail sender"""
-    config = open(self.fn, 'r+b')
-    for line in config:
-        sender = search(r'MailSender: )(.+)', line)
-            if sender:
-                return sender.group(2)
-    config.close()
-
-    def GetReportRcpts(self):
-    """Gets report recipients"""
-    config = open(self.fn, 'r+b')
-    for line in config:
-        rcpts = search(r'Recipients: )(.+)', line)
-        if rcpts:
-            return rcpts.group(2)
-    config.close()
-
-    def GetSMTPServer(self):
-    """Get a SMTP server name from config"""
-    config = open(self.fn, 'r+b')
-    for line in config:
-        smtpserver = search(r'SMTP: )(.+)', line)
-        if smtpserver:
-            return smtpserver.group(2)
-    config.close()
-
-def MailSend(sender, recipients, mailbody):
-    """Simple function to send mail."""
-    mail_sender = sender
-    mail_recipients = recipients
-    msg = MIMEText(mail_body)
-    msg['Subject'] = 'Unauthorized Admin Added to Admin Group'
-    msg['From'] = sender
-    msg['To'] = recipients
-    s = SMTP(gethostbyname('some.servername.com'), '25')
-    s.sendmail(sender, recipients, msg.as_string())
-    s.quit
+# Obtaining configuration.
+conf = coreutils.GetConfig(r'../etc/CheckGroups.cnf')
+# Obtaining the list of monitored groups.
+monitored_groups = conf.MonitoredGroups().split(',')
+# Obtaing the DBA group name.
+DBA_Group = conf.GetDBAGroup()
+# Obtaining the system admin group name.
+SA_Group = conf.GetSecGroup()
+# Obtaining the security admin group name.
+Sec_Group = conf.GetSAGroup()
+# Obtaining the list of authorized DBAs.
+DBA_Mbrs = conf.GetDBA()
+# Obtaining the list of authorized system administrators.
+SA_Mbrs = conf.GetSA()
+# Obtaining the list of authorized security administrators.
+Sec_Mmbrs = conf.GetSecAdmin()
+# Calling the GetGroup function, using sys.argv[1] as a host name and 
+# the monitored groups (as defined above).  The output will be a list 
+# of the monitored groups (including group members).
+groups = GetGroups(argv[1], monitored_groups)
