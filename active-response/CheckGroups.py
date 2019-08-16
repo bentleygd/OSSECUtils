@@ -7,7 +7,7 @@ import coreutils
 
 
 def GetGroups(host, monitored_groups):
-    '''SSH to a host and get the members of monitored groups.'''
+    """SSH to a host and get the members of monitored groups."""
     m_groups = []
     # SSH to the host and obtain the contents of /etc/group.  This 
     # takes the host name provided as input, and will produce a list 
