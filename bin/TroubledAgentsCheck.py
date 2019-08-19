@@ -3,8 +3,8 @@ from subprocess import check_output, check_call, CalledProcessError
 from socket import gaierror, gethostbyname
 from tempfile import TemporaryFile
 from email.mime.text import MIMEText
+from smtplib import SMTP
 import argparse
-import smtplib
 
 
 def GetTroubledAgents(StatusCheck):
@@ -36,7 +36,7 @@ def GetTroubledAgents(StatusCheck):
 
             if not address == 'NRF':
                 try:
-                    check_call(['ping', '-c', '1', address], stderr=GF,
+                    check_call(['/bin/ping', '-c', '1', address], stderr=GF,
                                stdout=GF)
                     DisconnectedAgents.append(agent_name)
                 except CalledProcessError:
@@ -64,7 +64,7 @@ def EmailAgentStatus(StatusCheck, AgentList):
     msg['Subject'] = '%s OSSEC Agents' % (StatusCheck.capitalize())
     msg['From'] = sender
     msg['To'] = recipients
-    s = smtplib.SMTP(gethostbyname('smtpserver.domain.com'), '25')
+    s = SMTP(gethostbyname('smtpserver.domain.com'), '25')
     s.sendmail(sender, recipients, msg.as_string())
     s.quit
 

@@ -1,19 +1,19 @@
 #!/usr/bin/python
-from sys import path, argv
-path.insert(0, '../lib')
 from subprocess import Popen, PIPE
 from re import search
+from sys import path, argv
+path.insert(0, '../lib')
 import coreutils
 
 
 def GetGroups(host, monitored_groups):
     """SSH to a host and get the members of monitored groups."""
     m_groups = []
-    # SSH to the host and obtain the contents of /etc/group.  This 
-    # takes the host name provided as input, and will produce a list 
+    # SSH to the host and obtain the contents of /etc/group.  This
+    # takes the host name provided as input, and will produce a list
     # of all groups and their members.
-    groups = str(Popen(['ssh', host, 'cat', '/etc/group'], stdout=PIPE
-                 ).stdout.read()).strip('\n').split('\n')
+    groups = str(Popen(['/usr/bin/ssh', host, 'cat', '/etc/group'],
+                 stdout=PIPE).stdout.read()).strip('\n').split('\n')
     # Parsses through the groups and returns the groups and members of
     # the monitored groups.
     for group in groups:
@@ -39,7 +39,7 @@ DBA_Mbrs = conf.GetDBA()
 SA_Mbrs = conf.GetSA()
 # Obtaining the list of authorized security administrators.
 Sec_Mmbrs = conf.GetSecAdmin()
-# Calling the GetGroup function, using sys.argv[1] as a host name and 
-# the monitored groups (as defined above).  The output will be a list 
+# Calling the GetGroup function, using sys.argv[1] as a host name and
+# the monitored groups (as defined above).  The output will be a list
 # of the monitored groups (including group members).
 groups = GetGroups(argv[1], monitored_groups)
