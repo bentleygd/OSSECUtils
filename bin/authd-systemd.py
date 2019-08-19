@@ -18,7 +18,7 @@ def AuthdStart():
                    '-k', key_path]
     print('Starting ossec-authd...')
     Popen(authd_start, stdout=authd_log, stderr=authd_log)
-    for proc in Popen(['ps', 'aux'], stdout=PIPE).stdout:
+    for proc in Popen(['/bin/ps', 'aux'], stdout=PIPE).stdout:
         if search('ossec-authd', proc):
             ossec_authd_pid = proc.split()[1]
     authd_log.write('AUTHD_PID is ' + str(ossec_authd_pid) + '\n')
@@ -30,7 +30,7 @@ def AuthdStart():
 # based on name rather than process id.
 def AuthdStop():
     print('Stopping ossec-authd...')
-    for proc in Popen(['ps', 'aux'], stdout=PIPE).stdout:
+    for proc in Popen(['/bin/ps', 'aux'], stdout=PIPE).stdout:
         if search('ossec-authd', proc):
             authd_pid = proc.split()[1]
     kill(int(authd_pid), 15)
@@ -43,7 +43,7 @@ def AuthdStop():
 # matches ossec-authd is running.
 def AuthdStatus():
     procs = []
-    for process in Popen(['ps', 'aux'], stdout=PIPE).stdout:
+    for process in Popen(['/bin/ps', 'aux'], stdout=PIPE).stdout:
         if search('ossec-authd', process):
             procs.append(process)
     if len(procs) > 0:
